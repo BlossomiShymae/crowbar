@@ -1,0 +1,32 @@
+# .github/workflows/release.yml
+
+on:
+  release:
+    types: [created]
+
+env:
+  PROJECT_NAME: crowbar
+
+jobs:
+  release:
+    name: Release
+    if: startsWith( github.ref, 'refs/tags/v' )
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install vsce
+        run: |
+          npm install -g @vscode/vsce
+      - name: Package
+        run: |
+          vsce package      
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: "${{env.PROJECT_NAME}}*.vsix"
+        if: startsWith( github.ref, 'refs/tags/v' )
